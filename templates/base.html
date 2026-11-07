@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Мій додаток{% endblock %}</title>
+  </head>
+  <body>
+    <header style="display: flex; justify-content: space-between; margin: 20px">
+      <a href="{{ url_for('index') }}">LAB6</a>
+      <a href="{{ url_for('new_grade')}}">Додати оцінку</a>
+    </header>
+    <main style="display: flex; gap: 40px; margin: 20px">
+      <nav
+        style="
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-top: 30px;
+        "
+      >
+        <a href="{{ url_for('index')}}">Головна</a>
+        <a href="{{ url_for('courses')}}">Дисципліни</a>
+        <a href="{{ url_for('all_grades')}}">Усі оцінки</a>
+        <a href="{{ url_for('avg')}}">Середні бали</a>
+        <a href="{{ url_for('course_ects')}}">ECTS до дисциплін</a>
+        <a href="{{ url_for('students_ects')}}">ECTS за студентами</a>
+      </nav>
+      <section style="flex: 1; min-width: 0">{% block content %}{% endblock %}</section>
+    </main>
+  </body>
+</html>

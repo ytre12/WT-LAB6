@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Додати оцінку{% endblock %}
+{% block content %}
+<h1>Додати оцінку</h1>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+{% if success %}
+<p>{{ success }}</p>
+{% endif %}
+
+<form method="post" action="{{ url_for('new_grade') }}">
+  <p>
+    <label for="student_id">Студент:</label><br>
+    <select id="student_id" name="student_id" required>
+      <option value="">— оберіть студента —</option>
+      {% for s in students %}
+      <option value="{{ s.id }}" {% if form['student_id'] == s.id|string %}selected{% endif %}>
+        {{ s.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label for="course_id">Дисципліна:</label><br>
+    <select id="course_id" name="course_id" required>
+      <option value="">— оберіть дисципліну —</option>
+      {% for c in courses %}
+      <option value="{{ c.id }}" {% if form['course_id'] == c.id|string %}selected{% endif %}>
+        {{ c.title }} ({{ c.semester }} семестр)
+      </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label for="value">Оцінка (0–100):</label><br>
+    <input id="value" name="value" type="number" min="0" max="100" step="1"
+           required value="{{ form['value'] }}">
+  </p>
+
+  <button type="submit">Додати</button>
+</form>
+{% endblock %}

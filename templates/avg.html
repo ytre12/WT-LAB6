@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block title %}Середній бал{% endblock %} {% block
+content %}
+<h1>Середній бал кожної дисципліни</h1>
+<ul>
+  {% for g in avg %}
+  <li>{{ g.title }} — {{ g.avg_grade if g.avg_grade is not none else '—' }}</li>
+  {% else %}
+  <li>Ще не додано жодної дисципліни</li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block title %}Усі оцінки{% endblock %} {% block
+content %}
+<h1>Усі оцінки</h1>
+<ul>
+  {% for g in grades %}
+  <li>
+    {{ g.name }} — {{ g.course }} ({{ g.semester }} семестр) — [ {{ g.grades }}
+    ]
+    <a href="{{ url_for('edit_grade', grade_id=g.grade_id) }}">Редагувати</a>
+
+    <form
+      method="post"
+      action="{{ url_for('delete_grade', grade_id=g.grade_id) }}"
+      style="display: inline"
+      onsubmit="return confirm('Видалити цю оцінку?');"
+    >
+      <button type="submit">Видалити</button>
+    </form>
+  </li>
+  {% else %}
+  <li>Записів ще немає</li>
+  {% endfor %}
+</ul>
+
+<p><a href="{{ url_for('index') }}">← Назад до студентів</a></p>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %} {% block title %}Дисципліни{% endblock %} {% block
+content %}
+<h1>Дисципліни</h1>
+<ul>
+  {% for c in courses%}
+  <li>
+    {{ c.title }} - {{ c.semester }} семестр - [
+    <a href="{{ url_for('rating', course_id=c.id) }}">Переглянути рейтинг</a>
+    ]
+  </li>
+  {% else %}
+  <li>Даних немає</li>
+  {% endfor %}
+</ul>
+{% endblock %}

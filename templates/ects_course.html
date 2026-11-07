@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block title %}Бали за ECTS{% endblock %} {% block
+content %}
+<h1>Кількість оцінок за шкалою ECTS</h1>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Дисципліна</th>
+      {% for l in letters %}
+      <th>{{ l }}</th>
+      {% endfor %}
+      <th>Усього</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in table %}
+    <tr>
+      <td>{{ row.title }}</td>
+      {% for l in letters %}
+      <td>{{ row.counts[l] }}</td>
+      {% endfor %}
+      <td>{{ row.total }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="{{ letters|length + 2 }}">Немає жодної дисципліни</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

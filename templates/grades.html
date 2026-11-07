@@ -1,0 +1,15 @@
+{% extends "base.html" %} {% block title %}Оцінки — {{ student.name }}{%
+endblock %} {% block content %}
+<h1>Оцінки: {{ student.name }}</h1>
+<ul>
+  {% for g in grades %}
+  <li>
+    {{ g.title }} — {{ g.semester }} семестр — {{ g.value if g.value is not none
+    else '—' }}
+  </li>
+  {% else %}
+  <li>Оцінок немає</li>
+  {% endfor %}
+</ul>
+<p><a href="{{ url_for('index') }}">← Назад до студентів</a></p>
+{% endblock %}

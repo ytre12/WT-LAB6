@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}ECTS за студентами{% endblock %}
+{% block content %}
+<h1>Кількість оцінок за ECTS по студентах і семестрах</h1>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Студент</th>
+      <th>Семестр</th>
+      <th>ECTS</th>
+      <th>Кількість</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.full_name }}</td>
+      <td>{{ r.semester }}</td>
+      <td>{{ r.ects }}</td>
+      <td>{{ r.grade_count }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4">Даних немає</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

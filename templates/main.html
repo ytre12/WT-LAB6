@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% block title %}Головна{% endblock %} {% block
+content %}
+<h1>Студенти</h1>
+<ul>
+  {% for s in students %}
+  <li>
+    {{ s.id }} — {{ s.name }} - [
+    <a href="{{ url_for('student_grades', student_id=s.id) }}">Оцінки</a> ]
+  </li>
+  {% else %}
+  <li>Даних немає</li>
+  {% endfor %}
+</ul>
+{% endblock %}
