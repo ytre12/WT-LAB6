@@ -6,9 +6,7 @@
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
 ![CSS](https://img.shields.io/badge/css-%23663399.svg?style=for-the-badge&logo=css&logoColor=white)
 
-Flask-застосунок для роботи з базою даних `points.db` (SQLite): перегляд
-студентів, дисциплін і оцінок, додавання, редагування та видалення оцінок,
-середні бали, рейтинг за дисципліною та звіти за шкалою ECTS.
+Flask-застосунок для роботи з базою даних `points.db` (SQLite)
 
 ## Вимоги
 
