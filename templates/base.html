@@ -9,6 +9,15 @@
     <header style="display: flex; justify-content: space-between; margin: 20px">
       <a href="{{ url_for('index') }}">LAB6</a>
       <a href="{{ url_for('new_grade')}}">Додати оцінку</a>
+      {% if g.user %}
+      <p>Користувач: {{ g.user['username'] }}</p>
+      <form method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">Вийти</button>
+      </form>
+      {% else %}
+      <a href="{{ url_for('login') }}">Увійти</a>
+      {% endif %}
     </header>
     <main style="display: flex; gap: 40px; margin: 20px">
       <nav

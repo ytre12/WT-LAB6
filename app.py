@@ -1,5 +1,6 @@
 import secrets
 import sqlite3
+from functools import wraps
 from pathlib import Path
 from threading import RLock
 from time import time
@@ -115,6 +116,17 @@ def require_csrf():
         abort(403)
 
 
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for("login"), code=303)
+        if request.method not in {"GET", "HEAD", "OPTIONS"}:
+            require_csrf()
+        return view(*args, **kwargs)
+    return wrapped
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -149,6 +161,18 @@ def login():
     sid, _ = create_session(user["id"])
     response = redirect(url_for("index"), code=303)
     set_session_cookie(response, sid)
+    return response
+
+
+@app.post("/logout")
+@login_required
+def logout():
+    remove_session(g.sid)
+    response = redirect(url_for("index"), code=303)
+    response.delete_cookie(
+        COOKIE_NAME, path="/", httponly=True,
+        secure=app.config["SESSION_COOKIE_SECURE"], samesite="Lax",
+    )
     return response
 
 
@@ -193,6 +217,7 @@ def all_grades():
 
 
 @app.route("/grades/<int:grade_id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_grade(grade_id):
     db = get_db()
 
@@ -268,6 +293,7 @@ def edit_grade(grade_id):
 
 
 @app.route("/grades/<int:grade_id>/delete", methods=["POST"])
+@login_required
 def delete_grade(grade_id):
     db = get_db()
 
@@ -306,6 +332,7 @@ def rating(course_id):
     return render_template('rating.html', course=course, rating=rating)
 
 @app.route("/grades/new", methods=["GET", "POST"])
+@login_required
 def new_grade():
     db = get_db()
 

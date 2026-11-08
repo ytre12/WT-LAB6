@@ -11,6 +11,8 @@
 {% endif %}
 
 <form method="post" action="{{ url_for('new_grade') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
   <p>
     <label for="student_id">Студент:</label><br>
     <select id="student_id" name="student_id" required>
