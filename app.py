@@ -1,5 +1,9 @@
+import secrets
 import sqlite3
 from pathlib import Path
+from threading import RLock
+from time import time
+
 from flask import (
     Flask, abort, g, redirect, render_template, request, url_for,
 )
@@ -7,6 +11,14 @@ from flask import (
 DATABASE = Path(__file__).with_name("points.db")
 
 app = Flask(__name__)
+
+COOKIE_NAME = "session_id"
+SESSION_TTL = 30 * 60
+sessions = {}
+sessions_lock = RLock()
+
+# Лише для локального навчального HTTP; для HTTPS задайте True.
+app.config["SESSION_COOKIE_SECURE"] = False
 
 
 def get_db():
@@ -21,6 +33,73 @@ def close_db(exception):
     db = g.pop("db", None)
     if db is not None:
         db.close()
+
+
+def create_session(user_id=None):
+    sid = secrets.token_urlsafe(32)
+    state = {
+        "user_id": user_id,
+        "csrf_token": secrets.token_urlsafe(32),
+        "expires_at": time() + SESSION_TTL,
+    }
+    with sessions_lock:
+        sessions[sid] = state
+    return sid, state.copy()
+
+
+def remove_session(sid):
+    with sessions_lock:
+        sessions.pop(sid, None)
+
+
+def set_session_cookie(response, sid):
+    response.set_cookie(
+        COOKIE_NAME, sid, max_age=SESSION_TTL,
+        httponly=True, secure=app.config["SESSION_COOKIE_SECURE"],
+        samesite="Lax", path="/",
+    )
+
+
+@app.before_request
+def load_current_user():
+    g.sid = request.cookies.get(COOKIE_NAME)
+    g.auth_session = None
+    g.user = None
+    now = time()
+    with sessions_lock:
+        expired = [
+            sid for sid, state in sessions.items()
+            if state["expires_at"] <= now
+        ]
+        for sid in expired:
+            sessions.pop(sid, None)
+        state = sessions.get(g.sid)
+        if state is not None:
+            g.auth_session = state.copy()
+    if g.auth_session and g.auth_session["user_id"] is not None:
+        g.user = get_db().execute(
+            "SELECT id, username FROM users WHERE id = ?",
+            (g.auth_session["user_id"],),
+        ).fetchone()
+        if g.user is None:
+            remove_session(g.sid)
+            g.auth_session = None
+
+
+@app.context_processor
+def session_template_data():
+    return {
+        "csrf_token": (
+            g.auth_session["csrf_token"] if g.auth_session else ""
+        ),
+    }
+
+
+@app.after_request
+def prevent_sensitive_caching(response):
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
 
 @app.route("/")
 def index():
