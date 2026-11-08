@@ -1,25 +1,9 @@
-"""Одноразове створення облікового запису в таблиці users.
-
-Запуск:
-    python3 create_user.py
-
-Скрипт запитує логін і пароль, обчислює хеш і додає користувача в points.db.
-Після створення потрібних записів цей файл можна видалити.
-"""
-
 from getpass import getpass
-
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from app import app, get_db
 
 
 def hash_password(password):
-    """Повертає хеш пароля з сіллю.
-
-    scrypt потребує OpenSSL з підтримкою scrypt; якщо його немає
-    (наприклад, у системному Python 3.9 на macOS), використовуємо PBKDF2.
-    """
     try:
         return generate_password_hash(password, method="scrypt")
     except (AttributeError, ValueError):
