@@ -7,6 +7,7 @@ from time import time
 from flask import (
     Flask, abort, g, redirect, render_template, request, url_for,
 )
+from werkzeug.security import check_password_hash
 
 DATABASE = Path(__file__).with_name("points.db")
 
@@ -98,6 +99,56 @@ def session_template_data():
 @app.after_request
 def prevent_sensitive_caching(response):
     response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def require_csrf():
+    token = request.form.get("csrf_token", "")
+    if (
+        not g.auth_session
+        or not token
+        or not token.isascii()
+        or not secrets.compare_digest(
+            token, g.auth_session["csrf_token"]
+        )
+    ):
+        abort(403)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        new_sid = None
+        if g.auth_session is None:
+            new_sid, g.auth_session = create_session()
+        response = app.make_response(
+            render_template("login.html", error=None)
+        )
+        if new_sid:
+            set_session_cookie(response, new_sid)
+        return response
+
+    require_csrf()
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "")
+    user = get_db().execute(
+        "SELECT id, username, password_hash FROM users WHERE username = ?",
+        (username,),
+    ).fetchone()
+    if (
+        not username
+        or not password
+        or user is None
+        or not check_password_hash(user["password_hash"], password)
+    ):
+        return render_template(
+            "login.html", error="Неправильний логін або пароль"
+        ), 401
+
+    remove_session(g.sid)
+    sid, _ = create_session(user["id"])
+    response = redirect(url_for("index"), code=303)
+    set_session_cookie(response, sid)
     return response
 
 
