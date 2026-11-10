@@ -1,3 +1,4 @@
+import os
 import secrets
 import sqlite3
 from functools import wraps
@@ -10,9 +11,18 @@ from flask import (
 )
 from werkzeug.security import check_password_hash
 
-DATABASE = Path(__file__).with_name("points.db")
+from db_init import ensure_database
+
 
 app = Flask(__name__)
+
+storage_dir = Path(
+    os.getenv("DATA_DIR", str(Path(__file__).resolve().parent / "instance"))
+).resolve()
+storage_dir.mkdir(parents=True, exist_ok=True)
+app.config["DATABASE"] = str(storage_dir / "app.sqlite3")
+
+ensure_database(app.config["DATABASE"])
 
 COOKIE_NAME = "session_id"
 SESSION_TTL = 30 * 60
@@ -25,7 +35,7 @@ app.config["SESSION_COOKIE_SECURE"] = False
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DATABASE)
+        g.db = sqlite3.connect(app.config["DATABASE"])
         g.db.row_factory = sqlite3.Row
         g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
@@ -519,4 +529,6 @@ def students_ects():
     return render_template("students_ects.html", rows=rows)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    port = int(os.getenv("PORT", "5001"))
+    debug = os.getenv("FLASK_DEBUG") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
