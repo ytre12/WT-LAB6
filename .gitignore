@@ -30,6 +30,7 @@ logs/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # OS / editors
 .DS_Store

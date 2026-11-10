@@ -9,6 +9,7 @@ from time import time
 from flask import (
     Flask, abort, g, redirect, render_template, request, url_for,
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash
 
 from db_init import ensure_database
@@ -21,6 +22,11 @@ storage_dir = Path(
 ).resolve()
 storage_dir.mkdir(parents=True, exist_ok=True)
 app.config["DATABASE"] = str(storage_dir / "app.sqlite3")
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
+
+# Застосунок працює за одним довіреним Nginx: враховуємо X-Forwarded-For
+# і X-Forwarded-Proto. X-Forwarded-Host Nginx не встановлює, тому x_host=0.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 ensure_database(app.config["DATABASE"])
 
@@ -70,6 +76,11 @@ def set_session_cookie(response, sid):
         httponly=True, secure=app.config["SESSION_COOKIE_SECURE"],
         samesite="Lax", path="/",
     )
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}, 200
 
 
 @app.before_request
